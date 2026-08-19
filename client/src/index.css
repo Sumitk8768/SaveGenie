@@ -1,0 +1,123 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Geist:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+@import "@fontsource/space-grotesk";
+@import "@fontsource/sora";
+
+:root {
+  --bg-900: #0a0a0d;
+  --bg-800: #131313;
+  --glass: rgba(25, 25, 33, 0.54);
+  --glass-border: rgba(184, 178, 255, 0.2);
+  --mint-400: #6ffbbe;
+  --mint-500: #4edea3;
+  --violet-400: #c0c1ff;
+  --violet-500: #8083ff;
+  --text-100: #e5e2e1;
+  --text-300: #c7c4d7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+}
+body {
+  background: black;
+  font-family: Inter, sans-serif;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: "Sora", sans-serif;
+}
+
+.glass-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(24px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 12px 40px rgba(3, 5, 19, 0.5);
+}
+
+.mint-glow {
+  box-shadow:
+    0 0 0 1px rgba(109, 255, 210, 0.35),
+    0 0 40px rgba(72, 239, 191, 0.2),
+    0 16px 40px rgba(10, 14, 28, 0.5);
+}
+
+.page-shell {
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+}
+
+.font-ui {
+  font-family: Geist, "Space Grotesk", sans-serif;
+}
+
+.starfield {
+  background-image:
+    radial-gradient(circle at 4% 6%, rgba(255, 255, 255, 0.35) 1px, transparent 2px),
+    radial-gradient(circle at 14% 22%, rgba(255, 255, 255, 0.25) 1px, transparent 2px),
+    radial-gradient(circle at 30% 18%, rgba(255, 255, 255, 0.2) 1px, transparent 2px),
+    radial-gradient(circle at 54% 26%, rgba(255, 255, 255, 0.2) 1px, transparent 2px),
+    radial-gradient(circle at 74% 14%, rgba(255, 255, 255, 0.3) 1px, transparent 2px),
+    radial-gradient(circle at 84% 28%, rgba(255, 255, 255, 0.2) 1px, transparent 2px),
+    radial-gradient(circle at 12% 56%, rgba(255, 255, 255, 0.2) 1px, transparent 2px),
+    radial-gradient(circle at 46% 62%, rgba(255, 255, 255, 0.2) 1px, transparent 2px),
+    radial-gradient(circle at 70% 58%, rgba(255, 255, 255, 0.2) 1px, transparent 2px),
+    radial-gradient(circle at 92% 72%, rgba(255, 255, 255, 0.25) 1px, transparent 2px),
+    radial-gradient(circle at 4% 92%, rgba(255, 255, 255, 0.25) 1px, transparent 2px),
+    radial-gradient(circle at 58% 90%, rgba(255, 255, 255, 0.2) 1px, transparent 2px),
+    radial-gradient(circle at 86% 94%, rgba(255, 255, 255, 0.23) 1px, transparent 2px);
+}
+
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.ai-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(60px);
+  opacity: 0.4;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--mint-500), var(--violet-500));
+  border-radius: 9999px;
+}
+
+@media (max-width: 640px) {
+  .hide-mobile {
+    display: none;
+  }
+}

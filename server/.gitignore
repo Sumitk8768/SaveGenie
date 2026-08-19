@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Environment variables (Crucial for backend secrets)
+.env
+
+# Debug logs and runtime files
+npm-debug.log*
+pids
+*.pid
+*.seed
+*.log
+
+# Optional: compiled code (if using TypeScript)
+dist/
