@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt"
-import jwt from "jsonwebtoken"
 
 const userSchema = new mongoose.Schema(
   {
@@ -22,19 +21,32 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
+    refreshToken: {
+      type: String,
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationOtpHash: String,
+    emailVerificationOtpExpires: Date,
+    passwordResetOtpHash: String,
+    passwordResetOtpExpires: Date,
   },
   { timestamps: true },
 );
 
-userSchema.pre("save", function(){
-    this.password = bcrypt.hashSync(this.password, 10)
-})
+userSchema.pre("save", function () {
+  if (!this.isModified("password")) {
+    return;
+  }
 
-// generateJWT is a private function in userSchema class
-userSchema.methods.generateJWT =  function(){
-    return jwt.sign({ id: this._id}, process.env.JWT_SECRET, { expiresIn: "1h"},)
+  this.password = bcrypt.hashSync(this.password, 10);
+});
+
+userSchema.methods.comparePass = async function (password) {
+  return await bcrypt.compare(password, this.password)
 }
-
 const UserModel = mongoose.model("User", userSchema);
 
 export default UserModel;

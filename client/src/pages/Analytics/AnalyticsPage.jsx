@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Bolt, TrendingUp, Verified } from 'lucide-react'
-import EmptyState from '../../components/shared/EmptyState.jsx'
-import GlassCard from '../../components/ui/GlassCard.jsx'
-import { analytics, sourceBreakdown } from '../../data/mockData.js'
-import { currency } from '../../utils/format.js'
+import EmptyState from '../../shared/ui/EmptyState.jsx'
+import GlassCard from '../../shared/ui/GlassCard.jsx'
+import { analytics, sourceBreakdown } from '../../shared/data/mockData.js'
+import { currency } from '../../shared/lib/format.js'
 
 function AnalyticsPage() {
   const [showEmpty] = useState(false)

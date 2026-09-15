@@ -1,8 +1,8 @@
 import { CreditCard, Link2, SlidersHorizontal } from 'lucide-react'
-import GlassCard from '../../components/ui/GlassCard.jsx'
-import SectionHeading from '../../components/ui/SectionHeading.jsx'
-import ToggleSwitch from '../../components/ui/ToggleSwitch.jsx'
-import { useAppContext } from '../../context/AppContext.jsx'
+import GlassCard from '../../shared/ui/GlassCard.jsx'
+import SectionHeading from '../../shared/ui/SectionHeading.jsx'
+import ToggleSwitch from '../../shared/ui/ToggleSwitch.jsx'
+import { useAppContext } from '../../app/providers/AppContext.js'
 
 function ProfilePage() {
   const { notifyDeals, setNotifyDeals, autoOptimize, setAutoOptimize } = useAppContext()

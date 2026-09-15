@@ -1,9 +1,9 @@
-import { useState } from 'react';
 import { 
   Sparkles, Bell, ArrowUpRight, ShieldCheck, Zap, 
   CreditCard, PiggyBank, Clock, RefreshCw, CheckSquare, 
   Scan, Copy, ChevronRight 
 } from 'lucide-react';
+import { useCopyCoupon } from '../../features/coupon/copy-coupon/useCopyCoupon.js';
 
 const RECOMMENDATIONS = [
   { id: 1, type: 'card', icon: <CreditCard className="h-4 w-4 text-purple-300" />, title: 'Best Card to Use', text: 'Use HDFC Millennia for Swiggy today to get 5% additional cashback.' },
@@ -22,13 +22,7 @@ const REMINDERS = [
 ];
 
 function AnalyticsDashboard() {
-  const [copiedId, setCopiedId] = useState(null);
-
-  const handleCopy = (id, code) => {
-    navigator.clipboard.writeText(code);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 1800);
-  };
+  const { copiedId, copyCoupon } = useCopyCoupon();
 
   return (
     <div className="w-full max-w-[1240px] mx-auto px-4 py-4 md:py-8 space-y-6">
@@ -159,7 +153,7 @@ function AnalyticsDashboard() {
                   <div className="flex items-center justify-between bg-white/[0.02] border border-white/5 rounded-lg p-1.5 pl-2.5">
                     <code className="text-[10px] font-mono tracking-wider text-zinc-300">{coupon.code}</code>
                     <button 
-                      onClick={() => handleCopy(coupon.id, coupon.code)}
+                      onClick={() => copyCoupon(coupon.id, coupon.code)}
                       className="p-1.5 rounded hover:bg-white/5 text-zinc-500 hover:text-white transition-colors cursor-pointer"
                     >
                       {copiedId === coupon.id ? (

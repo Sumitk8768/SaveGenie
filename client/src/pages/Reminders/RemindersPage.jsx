@@ -1,8 +1,8 @@
 import { BellOff, CalendarClock, CircleAlert, Clock3 } from 'lucide-react'
 import { useState } from 'react'
-import EmptyState from '../../components/shared/EmptyState.jsx'
-import ToggleSwitch from '../../components/ui/ToggleSwitch.jsx'
-import { reminderTimeline } from '../../data/mockData.js'
+import EmptyState from '../../shared/ui/EmptyState.jsx'
+import ToggleSwitch from '../../shared/ui/ToggleSwitch.jsx'
+import { reminderTimeline } from '../../shared/data/mockData.js'
 
 const toneStyles = {
   rose: 'text-rose-300 bg-rose-500/10 border-rose-500/20',
