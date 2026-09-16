@@ -1,124 +1,228 @@
-import mongoose from "mongoose";
 import Coupon from "../models/coupon.model.js";
-
-const isValidObjectId = (value) => mongoose.isValidObjectId(value);
-
-const validateCouponPayload = (payload, { partial = false } = {}) => {
-  const errors = {};
-  const requiredFields = ["title", "code", "discountType", "discountValue", "merchant", "expiryDate"];
-
-  if (!partial) {
-    for (const field of requiredFields) {
-      if (payload[field] === undefined || payload[field] === null || payload[field] === "") {
-        errors[field] = "This field is required";
-      }
-    }
-  }
-  if (payload.title !== undefined && (typeof payload.title !== "string" || !payload.title.trim())) {
-    errors.title = "Title must be a non-empty string";
-  }
-  if (payload.code !== undefined && (typeof payload.code !== "string" || !payload.code.trim())) {
-    errors.code = "Code must be a non-empty string";
-  }
-  if (payload.description !== undefined && typeof payload.description !== "string") {
-    errors.description = "Description must be a string";
-  }
-  if (payload.discountType !== undefined && !["percentage", "flat"].includes(payload.discountType)) {
-    errors.discountType = "Discount type must be percentage or flat";
-  }
-  if (payload.discountValue !== undefined &&
-      (typeof payload.discountValue !== "number" || !Number.isFinite(payload.discountValue) || payload.discountValue < 0)) {
-    errors.discountValue = "Discount value must be a non-negative number";
-  }
-  if (payload.discountType === "percentage" && payload.discountValue > 100) {
-    errors.discountValue = "Percentage discount cannot exceed 100";
-  }
-  if (payload.merchant !== undefined && !isValidObjectId(payload.merchant)) {
-    errors.merchant = "Merchant must be a valid id";
-  }
-  if (payload.expiryDate !== undefined) {
-    const expiryDate = new Date(payload.expiryDate);
-    if (Number.isNaN(expiryDate.getTime())) {
-      errors.expiryDate = "Expiry date must be a valid date";
-    } else if (expiryDate <= new Date()) {
-      errors.expiryDate = "Expiry date must be in the future";
-    }
-  }
-  if (payload.isActive !== undefined && typeof payload.isActive !== "boolean") {
-    errors.isActive = "isActive must be a boolean";
-  }
-  return errors;
-};
-
-const sendError = (res, error) => {
-  if (error.code === 11000) {
-    return res.status(409).json({ message: "A coupon with this code already exists for the merchant" });
-  }
-  if (error.name === "ValidationError" || error.name === "CastError") {
-    return res.status(400).json({ message: error.message });
-  }
-  return res.status(500).json({ message: "Internal server error" });
-};
-
-const requireValidId = (req, res) => {
-  if (!isValidObjectId(req.params.id)) {
-    res.status(400).json({ message: "Invalid coupon id" });
-    return false;
-  }
-  return true;
-};
+// import Merchant from "../models/merchant.model.js";
 
 export const createCoupon = async (req, res) => {
-  const errors = validateCouponPayload(req.body);
-  if (Object.keys(errors).length) return res.status(400).json({ message: "Invalid coupon data", errors });
   try {
-    const coupon = await Coupon.create(req.body);
-    return res.status(201).json(coupon);
+    const {
+      title,
+      code,
+      description,
+      discountType,
+      discountValue,
+      merchant,
+      expiryDate,
+      isActive,
+    } = req.body;
+
+    if (
+      !title ||
+      !code ||
+      !discountType ||
+      discountValue === undefined ||
+      !merchant ||
+      !expiryDate
+    ) {
+      return res.status(400).json({
+        message: "Required fields are missing",
+      });
+    }
+
+    if (!["percentage", "flat"].includes(discountType)) {
+      return res.status(400).json({
+        message: "Invalid discount type",
+      });
+    }
+
+    if (discountValue < 0) {
+      return res.status(400).json({
+        message: "Discount value cannot be negative",
+      });
+    }
+
+    if (discountType === "percentage" && discountValue > 100) {
+      return res.status(400).json({
+        message: "Percentage discount cannot exceed 100",
+      });
+    }
+
+    // const merchantExists = await Merchant.findById(merchant);
+
+    // if (!merchantExists) {
+    //   return res.status(404).json({
+    //     message: "Merchant not found",
+    //   });
+    // }
+
+    const coupon = await Coupon.create({
+      title,
+      code,
+      description,
+      discountType,
+      discountValue,
+      merchant,
+      expiryDate,
+      isActive,
+      createdBy: req.user._id,
+    });
+
+    return res.status(201).json({
+      message: "Coupon created successfully",
+      coupon,
+    });
+
   } catch (error) {
-    return sendError(res, error);
+    console.error("Create Coupon Error:", error.message);
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        message: "Coupon code already exists for this merchant",
+      });
+    }
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
 
-export const getCoupons = async (_req, res) => {
+export const getCoupons = async (req, res) => {
   try {
-    const coupons = await Coupon.find().sort({ createdAt: -1 });
-    return res.status(200).json(coupons);
+    const coupons = await Coupon.find({
+      createdBy: req.user._id,
+    }).populate("merchant", "name");
+
+    return res.status(200).json({
+      message: "Coupons fetched successfully",
+      coupons,
+    });
+
   } catch (error) {
-    return sendError(res, error);
+    console.error("Get Coupons Error:", error.message);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
 
 export const getCoupon = async (req, res) => {
-  if (!requireValidId(req, res)) return;
   try {
-    const coupon = await Coupon.findById(req.params.id);
-    if (!coupon) return res.status(404).json({ message: "Coupon not found" });
-    return res.status(200).json(coupon);
+    const coupon = await Coupon.findOne({
+      _id: req.params.id,
+      createdBy: req.user._id,
+    }).populate("merchant", "name");
+
+    if (!coupon) {
+      return res.status(404).json({
+        message: "Coupon not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Coupon fetched successfully",
+      coupon,
+    });
+
   } catch (error) {
-    return sendError(res, error);
+    console.error("Get Coupon Error:", error.message);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
 
 export const updateCoupon = async (req, res) => {
-  if (!requireValidId(req, res)) return;
-  const errors = validateCouponPayload(req.body, { partial: true });
-  if (Object.keys(errors).length) return res.status(400).json({ message: "Invalid coupon data", errors });
   try {
-    const coupon = await Coupon.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!coupon) return res.status(404).json({ message: "Coupon not found" });
-    return res.status(200).json(coupon);
+    const {
+      title,
+      code,
+      description,
+      discountType,
+      discountValue,
+      merchant,
+      expiryDate,
+      isActive,
+    } = req.body;
+
+
+    const merchantExists = await Merchant.findById(merchant);
+
+    if (!merchantExists) {
+      return res.status(404).json({
+        message: "Merchant not found",
+      });
+    }
+
+    const coupon = await Coupon.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        createdBy: req.user._id,
+      },
+      {
+        title,
+        code,
+        description,
+        discountType,
+        discountValue,
+        merchant,
+        expiryDate,
+        isActive,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!coupon) {
+      return res.status(404).json({
+        message: "Coupon not found or you are not allowed to update it",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Coupon updated successfully",
+      coupon,
+    });
+
   } catch (error) {
-    return sendError(res, error);
+    console.error("Update Coupon Error:", error.message);
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        message: "Coupon code already exists for this merchant",
+      });
+    }
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
 
 export const deleteCoupon = async (req, res) => {
-  if (!requireValidId(req, res)) return;
   try {
-    const coupon = await Coupon.findByIdAndDelete(req.params.id);
-    if (!coupon) return res.status(404).json({ message: "Coupon not found" });
-    return res.status(200).json({ message: "Coupon deleted successfully" });
+    const coupon = await Coupon.findOneAndDelete({
+      _id: req.params.id,
+      createdBy: req.user._id,
+    });
+
+    if (!coupon) {
+      return res.status(404).json({
+        message: "Coupon not found or you are not allowed to delete it",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Coupon deleted successfully",
+    });
+
   } catch (error) {
-    return sendError(res, error);
+    console.error("Delete Coupon Error:", error.message);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };

@@ -1,24 +1,13 @@
 import Router from "express"
 import authRoutes from "./auth.routes.js";
 import couponRoutes from "./coupon.routes.js";
-import authMidleware from "../middlewares/auth.middleware.js"
+import authMiddleware from "../middlewares/auth.middleware.js"
+import merchantRoutes from "./merchant.routes.js";
 
 const indexRoutes = Router();
 
 indexRoutes.use('/auth',authRoutes)
-indexRoutes.use("/coupons", authMidleware ,couponRoutes);
-
-indexRoutes.get("/check", authMidleware, (_req,res)=>{
-    try {
-        res.status(200).json({
-        message: "working",
-    })
-    } catch (error) {
-        res.status(500).json({
-        message: "working",
-        error,
-    })
- }
-})
+indexRoutes.use("/coupons", authMiddleware ,couponRoutes);
+indexRoutes.use("/merchants", authMiddleware, merchantRoutes);
 
 export default indexRoutes;
