@@ -22,7 +22,7 @@ const authMiddleware = async (req, res, next) => {
 
         // Find the user associated with the token
         const user = await UserModel.findById(decoded.id)
-            .select("-password -refreshToken")
+            .select("-password -refreshToken -emailVerificationOtpHash -emailVerificationOtpExpires -passwordResetOtpHash -passwordResetOtpExpires")
             .lean();
 
         // Token may be valid even though the user no longer exists
@@ -66,6 +66,22 @@ const authMiddleware = async (req, res, next) => {
             message: "Internal server error.",
         });
     }
+};
+
+export const isAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Authentication required.",
+    });
+  }
+
+  if (req.user.role !== "admin") {
+    return res.status(403).json({
+      message: "Access denied. Admins only.",
+    });
+  }
+
+  next();
 };
 
 export default authMiddleware;

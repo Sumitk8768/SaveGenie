@@ -1,36 +1,48 @@
 import express from "express";
-import cookieParser from "cookie-parser"
+import cors from "cors";
+import cookieParser from "cookie-parser";
 import indexRoutes from "./routes/index.routes.js";
-
 
 const app = express();
 
+// ─── CORS ─────────────────────────────────────────────────────────
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
-app.use((req, res, next) => {
-  const allowedOrigin = "http://localhost:5173";
+// ─── BODY PARSERS ─────────────────────────────────────────────────
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(cookieParser());
 
-  res.header("Access-Control-Allow-Origin", allowedOrigin);
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
-
-  next();
-});
-
-app.use(express.json());
-app.use(cookieParser())
-
+// ─── HEALTH CHECK ─────────────────────────────────────────────────
 app.get("/health", (_req, res) => {
   res.json({
     status: "ok",
+    environment: process.env.NODE_ENV,
+    timestamp: new Date().toISOString(),
   });
 });
 
-app.use("/api",indexRoutes)
+// ─── ROUTES ───────────────────────────────────────────────────────
+app.use("/api", indexRoutes);
 
+// ─── 404 HANDLER ──────────────────────────────────────────────────
+app.use((_req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
+
+// ─── GLOBAL ERROR HANDLER ─────────────────────────────────────────
+app.use((err, _req, res, _next) => {
+  console.error("Unhandled Error:", err.message);
+  res.status(err.status || 500).json({
+    message: err.message || "Internal server error",
+  });
+});
 
 export default app;

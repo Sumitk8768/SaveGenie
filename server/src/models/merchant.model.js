@@ -8,6 +8,13 @@ const merchantSchema = new mongoose.Schema(
       trim: true,
     },
 
+    slug: {                          
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,              
+    },
+
     website: {
       type: String,
       trim: true,
@@ -18,20 +25,24 @@ const merchantSchema = new mongoose.Schema(
       trim: true,
     },
 
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      index: true,
+    category: {                      
+      type: String,
+      enum: ["food", "fashion", "electronics", "travel", "entertainment", "grocery", "other"],
+      default: "other",
     },
+
+    isActive: {                    
+      type: Boolean,
+      default: true,
+    },
+
   },
   { timestamps: true }
 );
 
-merchantSchema.index(
-  { createdBy: 1, name: 1 },
-  { unique: true }
-);
+merchantSchema.index({ slug: 1 }, { unique: true });
+
+merchantSchema.index({ category: 1, isActive: 1 });
 
 const Merchant = mongoose.model("Merchant", merchantSchema);
 

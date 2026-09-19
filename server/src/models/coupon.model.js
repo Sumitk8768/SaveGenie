@@ -32,16 +32,9 @@ const couponSchema = new mongoose.Schema(
             min: 0,
         },
 
-        merchant: {
+        merchantId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Merchant",
-            required: true,
-            index: true,
-        },
-
-        createdBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
             required: true,
             index: true,
         },
@@ -57,10 +50,11 @@ const couponSchema = new mongoose.Schema(
         },
     },
     { timestamps: true }
+
 );
 
-couponSchema.index({ merchant: 1, code: 1 }, { unique: true });
-couponSchema.index({ merchant: 1, isActive: 1, expiryDate: 1 });
+couponSchema.index({ merchantId: 1, code: 1 }, { unique: true });
+couponSchema.index({ merchantId: 1, isActive: 1, expiryDate: 1 });
 
 const Coupon = mongoose.model("Coupon", couponSchema);
 
